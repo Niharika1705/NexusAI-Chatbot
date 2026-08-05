@@ -1,0 +1,21 @@
+services:
+  # The Unified NexusAI Backend (Python + Node.js)
+  - type: web
+    name: nexusai-backend
+    env: docker
+    dockerfilePath: Dockerfile
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: nexusai-db
+          property: connectionString
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false # You will enter this in the Render dashboard
+      - key: MISTRAL_API_KEY
+        sync: false # You will enter this in the Render dashboard
+
+databases:
+  # Free managed PostgreSQL Database on Render
+  - name: nexusai-db
+    databaseName: nexusai
+    user: nexusai
