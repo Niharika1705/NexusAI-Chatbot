@@ -182,7 +182,7 @@ def get_whatsapp_qr(user_id: Optional[int] = Query(None), force: bool = Query(Fa
     """
     uid = user_id or 1
     try:
-        res = requests.get(f"{config.WHATSAPP_SERVICE_URL}/api/wa/qr?user_id={uid}&force={'true' if force else 'false'}", timeout=30)
+        res = requests.get(f"{config.WHATSAPP_SERVICE_URL}/api/wa/qr?user_id={uid}&force={'true' if force else 'false'}", timeout=60)
         if res.status_code == 200:
             return res.json()
         else:

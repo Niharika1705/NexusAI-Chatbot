@@ -51,7 +51,7 @@ async function initWhatsAppSession(userId, forceRestart = false) {
     puppeteer: {
         headless: true,
         executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu']
     }
   });
 
@@ -244,8 +244,8 @@ app.get('/api/wa/qr', async (req, res) => {
   const userId = req.query.user_id || 1;
   const sessionObj = await initWhatsAppSession(userId, req.query.force === 'true');
 
-  // Wait up to 20 seconds for QR code to be generated or client to be ready
-  for (let i = 0; i < 40; i++) {
+  // Wait up to 45 seconds for QR code to be generated or client to be ready
+  for (let i = 0; i < 90; i++) {
     if (sessionObj.qrBase64 || sessionObj.connected) break;
     await new Promise((r) => setTimeout(r, 500));
   }
