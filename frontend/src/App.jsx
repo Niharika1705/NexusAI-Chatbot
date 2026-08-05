@@ -3,16 +3,17 @@ import './App.css';
 import Sidebar from './components/Sidebar';
 import ChatWindow from './components/ChatWindow';
 import MessageInput from './components/MessageInput';
-import Login from './components/Login';
 import SettingsModal from './components/SettingsModal';
-import LogoutModal from './components/LogoutModal';
 import { API_BASE_URL } from './config';
 
 function App() {
   const [auth, setAuth] = useState(() => {
-    const token = localStorage.getItem('auth_token');
-    const userId = localStorage.getItem('user_id');
-    return token ? { token, userId } : null;
+    let storedUserId = localStorage.getItem('nexus_auto_user_id');
+    if (!storedUserId) {
+      storedUserId = Math.floor(Math.random() * 100000000) + 1000;
+      localStorage.setItem('nexus_auto_user_id', storedUserId.toString());
+    }
+    return { token: 'mock-token', userId: parseInt(storedUserId, 10) };
   });
 
   // Persist selected channel & session in localStorage across reloads
@@ -29,7 +30,6 @@ function App() {
   const [isTyping, setIsTyping] = useState(false);
   const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [channelsStatus, setChannelsStatus] = useState({});
 
   const setActiveChannel = (channel) => {
@@ -40,34 +40,6 @@ function App() {
   const setActiveSession = (session) => {
     setActiveSessionState(session);
     localStorage.setItem('active_session', session);
-  };
-
-  const handleLogoutClick = () => {
-    setIsLogoutModalOpen(true);
-  };
-
-  const handleConfirmLogout = async () => {
-    try {
-      if (auth) {
-        await fetch(`${API_BASE_URL}/v1/auth/logout`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            token: auth.token,
-            user_id: auth.userId ? parseInt(auth.userId) : null
-          })
-        });
-      }
-    } catch (err) {
-      console.error("Backend logout notification error:", err);
-    } finally {
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('user_id');
-      localStorage.removeItem('active_channel');
-      localStorage.removeItem('active_session');
-      setAuth(null);
-      setIsLogoutModalOpen(false);
-    }
   };
 
   const handleNewChat = () => {
@@ -324,9 +296,7 @@ function App() {
     }
   };
 
-  if (!auth) {
-    return <Login setAuth={setAuth} />;
-  }
+  // Removed Login block
 
   return (
     <div className="app-container">
@@ -337,7 +307,6 @@ function App() {
         activeSession={activeSession}
         setActiveSession={setActiveSession}
         handleNewChat={handleNewChat}
-        handleLogout={handleLogoutClick}
         openSettings={() => setIsSettingsOpen(true)}
         onDeleteSession={handleDeleteSession}
         channelsStatus={channelsStatus}
@@ -359,11 +328,6 @@ function App() {
         isOpen={isSettingsOpen} 
         onClose={() => setIsSettingsOpen(false)} 
         auth={auth} 
-      />
-      <LogoutModal 
-        isOpen={isLogoutModalOpen}
-        onClose={() => setIsLogoutModalOpen(false)}
-        onConfirm={handleConfirmLogout}
       />
     </div>
   );

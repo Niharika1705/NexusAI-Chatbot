@@ -259,10 +259,6 @@ export default function Sidebar({
           <Settings size={16} />
           <span>Settings & Integrations</span>
         </div>
-        <div className="footer-item logout" onClick={handleLogout}>
-          <LogOut size={16} />
-          <span>Logout</span>
-        </div>
       </div>
     </aside>
   );

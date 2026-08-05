@@ -244,8 +244,8 @@ app.get('/api/wa/qr', async (req, res) => {
   const userId = req.query.user_id || 1;
   const sessionObj = await initWhatsAppSession(userId, req.query.force === 'true');
 
-  // Wait up to 45 seconds for QR code to be generated or client to be ready
-  for (let i = 0; i < 90; i++) {
+  // Wait up to 90 seconds for QR code to be generated or client to be ready
+  for (let i = 0; i < 180; i++) {
     if (sessionObj.qrBase64 || sessionObj.connected) break;
     await new Promise((r) => setTimeout(r, 500));
   }
