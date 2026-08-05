@@ -33,7 +33,17 @@ async function initWhatsAppSession(userId, forceRestart = false) {
       activeSessions.delete(userIdStr);
     }
     const sessionPath = path.join(SESSIONS_DIR, `session-${userIdStr}`);
-    try { fs.rmSync(sessionPath, { recursive: true, force: true }); } catch (e) {}
+    for (let i = 0; i < 5; i++) {
+      try {
+        if (fs.existsSync(sessionPath)) {
+          fs.rmSync(sessionPath, { recursive: true, force: true });
+        }
+        break;
+      } catch (e) {
+        if (i === 4) console.log(`[WhatsApp-Web Service] Force restart could not remove directory:`, e.message);
+        await new Promise(r => setTimeout(r, 1000));
+      }
+    }
   }
 
   if (activeSessions.has(userIdStr)) {
@@ -282,16 +292,31 @@ app.post('/api/wa/logout', async (req, res) => {
     const sessionObj = activeSessions.get(userIdStr);
     try {
       if (sessionObj.client) {
-        await sessionObj.client.logout();
+        try { await sessionObj.client.logout(); } catch(e) {}
+        try { await sessionObj.client.destroy(); } catch(e) {}
       }
     } catch (e) {}
     activeSessions.delete(userIdStr);
   }
 
   const sessionPath = path.join(SESSIONS_DIR, `session-${userIdStr}`);
-  try {
-    fs.rmSync(sessionPath, { recursive: true, force: true });
-  } catch (e) {}
+  let retries = 5;
+  const tryDelete = () => {
+    try {
+      if (fs.existsSync(sessionPath)) {
+        fs.rmSync(sessionPath, { recursive: true, force: true });
+        console.log(`[WhatsApp-Web Service] Successfully deleted session directory for User ${userIdStr}`);
+      }
+    } catch (e) {
+      if (retries > 0) {
+        retries--;
+        setTimeout(tryDelete, 1000);
+      } else {
+        console.log(`[WhatsApp-Web Service] Failed to delete session directory after retries: ${e.message}`);
+      }
+    }
+  };
+  setTimeout(tryDelete, 1000);
 
   return res.json({ status: 'success', message: 'WhatsApp session logged out successfully.' });
 });
