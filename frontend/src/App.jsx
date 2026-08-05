@@ -80,10 +80,17 @@ function App() {
         const sessions = data.sessions || [];
         setRecentSessions(sessions);
         
-        // Auto-select session only if there is no active session at all
-        if (sessions.length > 0 && !activeSession) {
-          setActiveSessionState(sessions[0]);
-          localStorage.setItem('active_session', sessions[0]);
+        // Auto-select session if there is no active session or the current one doesn't belong to this channel
+        if (sessions.length > 0) {
+          if (!activeSession || !sessions.includes(activeSession)) {
+            setActiveSessionState(sessions[0]);
+            localStorage.setItem('active_session', sessions[0]);
+          }
+        } else {
+          // If no sessions exist for this channel, clear active session or start a new one
+          if (activeSession && !activeSession.startsWith(activeChannel === 'webchat' ? 'session_' : `${activeChannel}_`)) {
+             handleNewChat();
+          }
         }
       }
     } catch (error) {
