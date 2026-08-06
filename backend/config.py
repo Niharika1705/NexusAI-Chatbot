@@ -14,6 +14,10 @@ class Config:
     MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY", "")
     MISTRAL_MODEL = os.getenv("MISTRAL_MODEL", "mistral-small-latest")
     DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./nexusai.db")
+    
+    # If running on Render and the database URL is still pointing to localhost, fallback to SQLite
+    if os.getenv("RENDER") and "127.0.0.1" in DATABASE_URL:
+        DATABASE_URL = "sqlite:///./nexusai.db"
 
 config = Config()
 
