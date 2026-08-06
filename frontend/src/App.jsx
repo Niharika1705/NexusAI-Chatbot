@@ -77,7 +77,13 @@ function App() {
       const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
-        const sessions = data.sessions || [];
+        let sessions = data.sessions || [];
+        
+        const isValidPrefix = activeSession && activeSession.startsWith(activeChannel === 'webchat' ? 'session_' : `${activeChannel}_`);
+        if (activeSession && isValidPrefix && !sessions.includes(activeSession)) {
+          sessions = [activeSession, ...sessions];
+        }
+
         setRecentSessions(sessions);
         
         // Auto-select session if there is no active session or the current one doesn't belong to this channel
