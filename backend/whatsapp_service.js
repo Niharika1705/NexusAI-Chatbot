@@ -244,6 +244,7 @@ async function initWhatsAppSession(userId, forceRestart = false) {
 
   client.initialize().catch(err => {
     console.error(`[WhatsApp-Web Init Error]:`, err);
+    sessionObj.error = err.message || "Failed to initialize WhatsApp client.";
   });
 
   return sessionObj;
@@ -254,10 +255,14 @@ app.get('/api/wa/qr', async (req, res) => {
   const userId = req.query.user_id || 1;
   const sessionObj = await initWhatsAppSession(userId, req.query.force === 'true');
 
-  // Wait up to 90 seconds for QR code to be generated or client to be ready
-  for (let i = 0; i < 180; i++) {
-    if (sessionObj.qrBase64 || sessionObj.connected) break;
+  // Wait up to 20 seconds for QR code to be generated or client to be ready
+  for (let i = 0; i < 40; i++) {
+    if (sessionObj.qrBase64 || sessionObj.connected || sessionObj.error) break;
     await new Promise((r) => setTimeout(r, 500));
+  }
+
+  if (sessionObj.error) {
+    return res.status(500).json({ error: sessionObj.error });
   }
 
   return res.json({
