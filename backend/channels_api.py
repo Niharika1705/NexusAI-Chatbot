@@ -157,7 +157,9 @@ def get_channels_status(user_id: Optional[int] = Query(None)):
     # Query WhatsApp Web Service (Port 8006)
     whatsapp_info = {
         "connected": False,
-        "phone": "Disconnected"
+        "phone": "Disconnected",
+        "qr_code": None,
+        "connecting": False
     }
     try:
         wa_res = requests.get(f"{config.WHATSAPP_SERVICE_URL}/api/wa/status?user_id={uid}", timeout=4)
@@ -165,6 +167,8 @@ def get_channels_status(user_id: Optional[int] = Query(None)):
             data = wa_res.json()
             whatsapp_info["connected"] = data.get("connected", False)
             whatsapp_info["phone"] = data.get("phone") or ("Connected" if data.get("connected") else "Disconnected")
+            whatsapp_info["qr_code"] = data.get("qr_code")
+            whatsapp_info["connecting"] = data.get("connecting", False)
     except Exception as e:
         whatsapp_info["phone"] = "Service Offline (Start whatsapp_service.js)"
 

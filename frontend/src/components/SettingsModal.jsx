@@ -40,6 +40,8 @@ export default function SettingsModal({ isOpen, onClose, auth }) {
             clearInterval(pollIntervalRef.current);
             pollIntervalRef.current = null;
           }
+        } else if (data.whatsapp?.qr_code) {
+          setQrCodeData(data.whatsapp.qr_code);
         }
       }
     } catch (err) {
@@ -272,11 +274,11 @@ export default function SettingsModal({ isOpen, onClose, auth }) {
                         type="button"
                         className="channel-action-btn primary"
                         onClick={() => handleGenerateWhatsAppQR(true)}
-                        disabled={qrLoading}
+                        disabled={qrLoading || (channelsStatus.whatsapp?.connecting && !qrCodeData)}
                         style={{ width: '100%', padding: '0.85rem 1.25rem', fontSize: '0.95rem', fontWeight: '700', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                       >
                         <QrCode size={18} />
-                        <span>{qrLoading ? 'Generating Fresh QR Code...' : 'Generate WhatsApp Pairing QR Code'}</span>
+                        <span>{qrLoading ? 'Generating Fresh QR Code...' : (channelsStatus.whatsapp?.connecting && !qrCodeData ? 'Starting WhatsApp Service...' : 'Generate WhatsApp Pairing QR Code')}</span>
                       </button>
 
                       {qrCodeData && (

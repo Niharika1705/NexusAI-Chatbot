@@ -61,7 +61,7 @@ async function initWhatsAppSession(userId, forceRestart = false) {
     puppeteer: {
         headless: true,
         executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu']
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--no-zygote', '--single-process']
     }
   });
 
@@ -285,7 +285,8 @@ app.get('/api/wa/status', async (req, res) => {
   return res.json({
     connected: sessionObj.connected,
     phone: sessionObj.phone || (sessionObj.connected ? 'Linked' : 'Disconnected'),
-    qr_code: sessionObj.qrBase64
+    qr_code: sessionObj.qrBase64,
+    connecting: sessionObj.connecting
   });
 });
 
