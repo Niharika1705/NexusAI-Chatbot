@@ -136,7 +136,8 @@ async function initWhatsAppSession(userId, forceRestart = false) {
         console.log(`[DEBUG] fromMe: ${msg.key.fromMe}, remoteJid: ${remoteJid}, myJid: ${myJid}`);
         
         // 2. Only process messages sent TO yourself
-        const isSelfChat = remoteJid.includes(myJid.split('@')[0]) || remoteJid.includes('@lid');
+        const meLid = sock.authState?.creds?.me?.lid?.split(':')[0];
+        const isSelfChat = remoteJid.includes(myJid.split('@')[0]) || (meLid && remoteJid.includes(meLid));
         if (!isSelfChat) {
             continue;
         }
